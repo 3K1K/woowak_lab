@@ -3,6 +3,7 @@ package camp.woowak.lab.order.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,14 +66,24 @@ public class OrderCreationService {
 			.orElseThrow(() -> new EmptyCartException("구매자 " + requesterId + "가 비어있는 카트로 주문을 시도했습니다."));
 		List<CartItem> cartItems = cart.getCartItems();
 
-		Order savedOrder = orderRepository.save(
-			new Order(requester, cartItems, singleStoreOrderValidator, stockRequester, priceChecker,
-				withdrawPointService, dateTimeProvider.now())
-		);
+		Order order = new Order(requester, cartItems, singleStoreOrderValidator, stockRequester, priceChecker,
+			withdrawPointService, dateTimeProvider.now());
 
-		saveOrderPayment(savedOrder);
-		cartRepository.delete(cart);
-		return savedOrder.getId();
+		int retryCount = 0;
+		int retryMaxCount = 2;
+		while (retryCount < retryMaxCount) {
+			try {
+				Order savedOrder = orderRepository.save(order);
+				saveOrderPayment(savedOrder);
+				cartRepository.delete(cart);
+			} catch (ObjectOptimisticLockingFailureException e) {
+				if (retryCount >= retryMaxCount) {
+					throw new RuntimeException();
+				}
+				retryCount++;
+			}
+		}
+		return order.getId();
 	}
 
 	private void saveOrderPayment(final Order savedOrder) {
