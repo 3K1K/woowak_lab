@@ -1,7 +1,6 @@
 package camp.woowak.lab.menu.domain;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.data.annotation.Version;
 
 import camp.woowak.lab.menu.exception.InvalidMenuPriceUpdateException;
 import camp.woowak.lab.menu.exception.NotEnoughStockException;
@@ -14,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,7 +49,7 @@ public class Menu {
 	private String imageUrl;
 
 	@Version
-	private Long version;
+	private Long version = 0L;
 
 	public Menu(Store store, MenuCategory menuCategory, String name,
 				Long price, Long stockCount, String imageUrl
