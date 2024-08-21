@@ -49,7 +49,7 @@ public class Menu {
 	private String imageUrl;
 
 	@Version
-	private Long versionDate;
+	private Long version;
 
 	public Menu(Store store, MenuCategory menuCategory, String name,
 				Long price, Long stockCount, String imageUrl
