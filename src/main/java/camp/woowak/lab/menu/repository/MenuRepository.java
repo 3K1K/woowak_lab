@@ -18,7 +18,7 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT m FROM Menu m where m.id in :ids")
-	List<Menu> findAllByIdForUpdate(List<Long> ids);
+	List<Menu> findAllByIdForUpdatePessimistic(List<Long> ids);
 
 	@Lock(LockModeType.OPTIMISTIC)
 	@Query("SELECT m FROM Menu m where m.id in :ids")
