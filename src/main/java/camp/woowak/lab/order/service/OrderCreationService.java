@@ -79,6 +79,12 @@ public class OrderCreationService {
 				return order.getId();
 			} catch (ObjectOptimisticLockingFailureException e) {
 				retryCount++;
+				// 잠깐 대기
+				try {
+					Thread.sleep(10 * retryCount);
+				} catch (InterruptedException interruptedException) {
+					Thread.currentThread().interrupt();
+				}
 				if (retryCount >= retryMaxCount) {
 					throw new RuntimeException();
 				}
