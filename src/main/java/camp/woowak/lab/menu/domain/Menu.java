@@ -1,6 +1,7 @@
 package camp.woowak.lab.menu.domain;
 
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.Version;
 
 import camp.woowak.lab.menu.exception.InvalidMenuPriceUpdateException;
 import camp.woowak.lab.menu.exception.NotEnoughStockException;
@@ -46,6 +47,9 @@ public class Menu {
 
 	@Column(nullable = false)
 	private String imageUrl;
+
+	@Version
+	private Long versionDate;
 
 	public Menu(Store store, MenuCategory menuCategory, String name,
 				Long price, Long stockCount, String imageUrl
