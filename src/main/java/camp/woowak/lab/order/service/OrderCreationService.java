@@ -71,19 +71,19 @@ public class OrderCreationService {
 
 		int retryCount = 0;
 		int retryMaxCount = 2;
-		while (retryCount < retryMaxCount) {
+		while (true) {
 			try {
 				Order savedOrder = orderRepository.save(order);
 				saveOrderPayment(savedOrder);
 				cartRepository.delete(cart);
+				return order.getId();
 			} catch (ObjectOptimisticLockingFailureException e) {
+				retryCount++;
 				if (retryCount >= retryMaxCount) {
 					throw new RuntimeException();
 				}
-				retryCount++;
 			}
 		}
-		return order.getId();
 	}
 
 	private void saveOrderPayment(final Order savedOrder) {
