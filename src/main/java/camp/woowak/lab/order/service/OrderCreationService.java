@@ -1,6 +1,7 @@
 package camp.woowak.lab.order.service;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -59,35 +60,38 @@ public class OrderCreationService {
 	 * @throws InsufficientBalanceException 구매자의 계좌에 잔액이 충분하지 않은 경우
 	 */
 	public Long create(final OrderCreationCommand cmd) {
-		UUID requesterId = cmd.requesterId();
-		Customer requester = customerRepository.findByIdOrThrow(requesterId);
-
-		Cart cart = cartRepository.findByCustomerId(requesterId.toString())
-			.orElseThrow(() -> new EmptyCartException("구매자 " + requesterId + "가 비어있는 카트로 주문을 시도했습니다."));
-		List<CartItem> cartItems = cart.getCartItems();
-
-		Order order = new Order(requester, cartItems, singleStoreOrderValidator, stockRequester, priceChecker,
-			withdrawPointService, dateTimeProvider.now());
 
 		int retryCount = 0;
 		int retryMaxCount = 2;
+		Random random = new Random();
 		while (true) {
 			try {
+				UUID requesterId = cmd.requesterId();
+				Customer requester = customerRepository.findByIdOrThrow(requesterId);
+
+				Cart cart = cartRepository.findByCustomerId(requesterId.toString())
+					.orElseThrow(() -> new EmptyCartException("구매자 " + requesterId + "가 비어있는 카트로 주문을 시도했습니다."));
+				List<CartItem> cartItems = cart.getCartItems();
+
+				Order order = new Order(requester, cartItems, singleStoreOrderValidator, stockRequester, priceChecker,
+					withdrawPointService, dateTimeProvider.now());
+
 				Order savedOrder = orderRepository.save(order);
 				saveOrderPayment(savedOrder);
 				cartRepository.delete(cart);
 				return order.getId();
 			} catch (ObjectOptimisticLockingFailureException e) {
 				retryCount++;
-				// 잠깐 대기
+				if (retryCount >= retryMaxCount) {
+					throw e;
+				}
 				try {
-					Thread.sleep(10 * retryCount);
+					// 임의 시간동안 대기
+					Thread.sleep((random.nextInt(100) + 1));
 				} catch (InterruptedException interruptedException) {
 					Thread.currentThread().interrupt();
 				}
-				if (retryCount >= retryMaxCount) {
-					throw new RuntimeException();
-				}
+
 			}
 		}
 	}
