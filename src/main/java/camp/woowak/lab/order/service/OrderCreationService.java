@@ -24,6 +24,7 @@ import camp.woowak.lab.order.exception.EmptyCartException;
 import camp.woowak.lab.order.exception.MinimumOrderPriceNotMetException;
 import camp.woowak.lab.order.exception.MultiStoreOrderException;
 import camp.woowak.lab.order.exception.NotFoundMenuException;
+import camp.woowak.lab.order.exception.OptimisticLockRetryException;
 import camp.woowak.lab.order.repository.OrderRepository;
 import camp.woowak.lab.order.service.command.OrderCreationCommand;
 import camp.woowak.lab.payaccount.exception.InsufficientBalanceException;
@@ -83,7 +84,7 @@ public class OrderCreationService {
 			} catch (ObjectOptimisticLockingFailureException e) {
 				retryCount++;
 				if (retryCount >= retryMaxCount) {
-					throw e;
+					throw new OptimisticLockRetryException("주문 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
 				}
 				try {
 					// 임의 시간동안 대기
