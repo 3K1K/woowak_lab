@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import camp.woowak.lab.common.advice.DomainExceptionHandler;
 import camp.woowak.lab.common.exception.HttpStatusException;
+import camp.woowak.lab.order.exception.OptimisticLockRetryException;
 import camp.woowak.lab.store.exception.NotEqualsOwnerException;
 import camp.woowak.lab.store.exception.NotFoundStoreException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,12 @@ public class OrderExceptionHandler {
 	public ProblemDetail handleNotEqualsOwnerException(NotEqualsOwnerException e) {
 		log.error("Not Equals Owner", e);
 		return getProblemDetail(HttpStatus.UNAUTHORIZED, e);
+	}
+
+	@ExceptionHandler(value = OptimisticLockRetryException.class)
+	public ProblemDetail handleOptimisticEntityLockException(OptimisticLockRetryException e) {
+		log.error("Optimistic Entity Lock", e);
+		return getProblemDetail(HttpStatus.CONFLICT, e);
 	}
 
 	private ProblemDetail getProblemDetail(HttpStatus status, HttpStatusException e) {
