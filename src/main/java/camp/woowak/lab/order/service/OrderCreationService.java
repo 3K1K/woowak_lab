@@ -62,7 +62,7 @@ public class OrderCreationService {
 	public Long create(final OrderCreationCommand cmd) {
 
 		int retryCount = 0;
-		int retryMaxCount = 2;
+		int retryMaxCount = 4;
 		Random random = new Random();
 		while (true) {
 			try {
