@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class MenuStockUpdateService {
+public class MenuStockUpdateScheduleService {
 	private final UpdateMenuStockDao updateMenuStockDao;
 	private final RedissonClient redissonClient;
 
